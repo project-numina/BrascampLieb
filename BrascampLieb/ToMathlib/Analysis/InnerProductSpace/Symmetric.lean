@@ -32,7 +32,7 @@ lemma IsSymmetric.roots_charpoly_eq_eigenvalues {𝕜 E : Type*} [RCLike 𝕜] {
   · simp [Finset.prod_ne_zero_iff, Polynomial.X_sub_C_ne_zero]
 
 attribute [local grind .] LinearMap.IsSymmetric.eigenvalues_antitone List.sortedGE_ofFn_iff in
-lemma IsSymmetric.eigenvlaues_linearIsometryEquiv_conj {𝕜 E F: Type*} [RCLike 𝕜]
+lemma IsSymmetric.eigenvlaues_linearIsometryEquiv_conj {𝕜 E F : Type*} [RCLike 𝕜]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]
     [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 F]
     {n : ℕ} (hn : Module.finrank 𝕜 E = n) (hn' : Module.finrank 𝕜 F = n)
@@ -59,3 +59,5 @@ lemma IsSymmetric.det_eq_prod_eigenvalues {E 𝕜 : Type*} {n} [RCLike 𝕜]
     T.det = ∏ i, hT.eigenvalues hn i := by
   simp [← LinearMap.det_toMatrix (hT.eigenvectorBasis hn).toBasis,
     hT.toMatrix_eigenvectorBasis_diagonal]
+
+end LinearMap

@@ -31,7 +31,7 @@ lemma mem_range_singularValues (σ : ℝ) :
   hi ▸ l.singularValues_def hn i ▸ Real.sqrt_nonneg _⟩, fun ⟨⟨i, hi⟩, hσ⟩ ↦ ⟨i,
   l.singularValues_def hn i ▸ hi ▸ Real.sqrt_sq hσ⟩⟩
 
-theorem IsSymmetric.mem_range_eigenvalues  {T : E →ₗ[𝕜] E} (hT : T.IsSymmetric) (μ : 𝕜)
+theorem IsSymmetric.mem_range_eigenvalues {T : E →ₗ[𝕜] E} (hT : T.IsSymmetric) (μ : 𝕜)
     (hμ : Module.End.HasEigenvalue T μ) : ∃ i, hT.eigenvalues hn i = μ := by
   obtain ⟨v, hv_mem, hv_ne⟩ := hμ.exists_hasEigenvector
   let B := hT.eigenvectorBasis hn
@@ -46,7 +46,8 @@ theorem IsSymmetric.mem_range_eigenvalues  {T : E →ₗ[𝕜] E} (hT : T.IsSymm
 lemma adjoin_comp_self_eigenvals {f : E →ₗ[𝕜] E} :
     ∀ σ ∈ Set.range (f.isPositive_adjoint_comp_self.1.eigenvalues hn),
     σ ≠ 0 → σ ∈ Set.range (f.isPositive_self_comp_adjoint.1.eigenvalues hn) := fun σ ⟨i, hi⟩ h2 ↦ by
-  have hspec : (σ : 𝕜) ∈ spectrum 𝕜 (f.adjoint * f) \ {0} := ⟨Module.End.hasEigenvalue_iff_mem_spectrum.1
+  have hspec : (σ : 𝕜) ∈ spectrum 𝕜 (f.adjoint * f) \ {0} :=
+      ⟨Module.End.hasEigenvalue_iff_mem_spectrum.1
     (hi ▸ f.isPositive_adjoint_comp_self.1.hasEigenvalue_eigenvalues hn i), by simpa⟩
   rw [spectrum.nonzero_mul_comm] at hspec
   simpa using f.isPositive_self_comp_adjoint.1.mem_range_eigenvalues hn σ <|
@@ -55,7 +56,8 @@ lemma adjoin_comp_self_eigenvals {f : E →ₗ[𝕜] E} :
 lemma self_comp_adjoin_eigenvals {f : E →ₗ[𝕜] E} :
     ∀ σ ∈ Set.range (f.isPositive_self_comp_adjoint.1.eigenvalues hn),
     σ ≠ 0 → σ ∈ Set.range (f.isPositive_adjoint_comp_self.1.eigenvalues hn) := fun σ ⟨i, hi⟩ h2 ↦ by
-  have h1 : (σ : 𝕜) ∈ spectrum 𝕜 (f * f.adjoint) \ {0} := ⟨Module.End.hasEigenvalue_iff_mem_spectrum.1
+  have h1 : (σ : 𝕜) ∈ spectrum 𝕜 (f * f.adjoint) \ {0} :=
+      ⟨Module.End.hasEigenvalue_iff_mem_spectrum.1
     (hi ▸ f.isPositive_self_comp_adjoint.1.hasEigenvalue_eigenvalues hn i), by simpa⟩
   rw [spectrum.nonzero_mul_comm] at h1
   simpa using  f.isPositive_adjoint_comp_self.1.mem_range_eigenvalues hn σ <|
@@ -95,3 +97,5 @@ lemma singularValues_comp_linearIsometryEquiv {T : E →ₗ[𝕜] F} {f : E ≃�
   rw [comp_assoc]
   congr
   exact LinearIsometryEquiv.adjoint_eq_symm' f
+
+end LinearMap

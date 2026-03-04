@@ -49,7 +49,8 @@ lemma hasEigenvalue_one_add (M : Matrix (Fin n) (Fin n) ℂ) (γ : ℂ)
   rw [h2, ← spectrum.singleton_add_eq]
   exact Set.add_mem_add (Set.mem_singleton 1) h
 
-lemma LinearMap.hassEigenvalue_iff_sub_zero_char {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+lemma LinearMap.hassEigenvalue_iff_sub_zero_char {R M : Type*}
+    [CommRing R] [AddCommGroup M] [Module R M]
     (r : R) (f : Module.End R M) : Module.End.HasEigenvalue f r ↔
     Module.End.HasEigenvalue (f - r • 1) 0 := by
   simp [Module.End.hasEigenvalue_iff, Module.End.eigenspace_def]

@@ -6,11 +6,13 @@ namespace LinearMap.IsPositive
 
 open scoped ComplexOrder
 
-lemma det_nonneg' {ι 𝕜 E : Type*} [RCLike 𝕜] [Fintype ι] [DecidableEq ι]
+lemma det_nonneg' {ι 𝕜 E : Type*} [RCLike 𝕜] [Fintype ι]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     {T : E →ₗ[𝕜] E} (hT : T.IsPositive) (b : OrthonormalBasis ι 𝕜 E) :
-    0 ≤ T.det := LinearMap.det_toMatrix b.toBasis T ▸
-  Matrix.PosSemidef.det_nonneg <| LinearMap.posSemidef_toMatrix_iff b|>.2 hT
+    0 ≤ T.det := by
+  classical
+  exact LinearMap.det_toMatrix b.toBasis T ▸
+    Matrix.PosSemidef.det_nonneg <| LinearMap.posSemidef_toMatrix_iff b|>.2 hT
 
 lemma det_nonneg {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     [FiniteDimensional 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) : 0 ≤ T.det := by
@@ -55,7 +57,8 @@ lemma _root_.inner_le_of_le {E : Type*} [NormedAddCommGroup E] [InnerProductSpac
   rw [← sub_nonneg, ← inner_sub_left, ← LinearMap.sub_apply]
   exact h.inner_nonneg_left x
 
-lemma _root_.inner_apply_eigenBasis_left {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+lemma _root_.inner_apply_eigenBasis_left
+    {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     (hn : Module.finrank ℝ E = n) [FiniteDimensional ℝ E] {A : E →ₗ[ℝ] E} (hA : A.IsSymmetric) (i) :
     inner ℝ (A (hA.eigenvectorBasis hn i)) (hA.eigenvectorBasis hn i) = hA.eigenvalues hn i := by
   simp [hA.apply_eigenvectorBasis hn, inner_smul_left]
@@ -103,3 +106,7 @@ lemma bot_eigenvalue_le_of_le {E : Type*} {n} [NormedAddCommGroup E]
   refine le_trans' (b := ∑ j, hA.1.eigenvalues hn j * (inner ℝ (bA j) (bB n')) ^ 2) ?_ <|
     Finset.sum_le_sum fun j _ ↦ by gcongr; exact hA.1.eigenvalues_antitone hn (by grind)
   grw [← h_inner_A_eB, inner_le_of_le h (bB n'), inner_apply_eigenBasis_left hn _ n']
+
+end IsPositive
+
+end LinearMap

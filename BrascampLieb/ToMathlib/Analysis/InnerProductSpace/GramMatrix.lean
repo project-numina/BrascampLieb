@@ -12,7 +12,7 @@ import Mathlib.Data.Real.CompleteField
 namespace Matrix
 
 lemma gram_not_PosDef_det {E I : Type*} [Fintype I] [DecidableEq I]
-    [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]  (v : I → E)
+    [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] (v : I → E)
     (h : ¬ (gram ℝ v).PosDef) :
     (gram ℝ v).det = 0 := by_contra fun h1 ↦ h <| (posSemidef_gram ℝ _).posDef_iff_isUnit.2 <|
   (gram ℝ v).isUnit_iff_isUnit_det.2 <| Ne.isUnit h1
@@ -49,7 +49,8 @@ lemma det_gram_eq_prod_infDist {E I : Type*} [NormedAddCommGroup E] [InnerProduc
       -- update to
       -- have IH' :
       --     (gram ℝ (J.restrict v)).det
-      --     =  ∏ i, Metric.infDist (J.restrict v i) ↑(Submodule.span ℝ (J.restrict v '' Set.Ioi i)) ^ 2 := by
+      --     =  ∏ i, Metric.infDist (J.restrict v i)
+      --           ↑(Submodule.span ℝ (J.restrict v '' Set.Ioi i)) ^ 2 := by
       --   convert IH
       -- rw [this, IH']
       simp only [inner_self_eq_norm_sq_to_K, hu, v₀, Real.ringHom_apply, Set.restrict_apply]
@@ -156,3 +157,5 @@ theorem gram_eq_conj_mul {E : Type*} {n m} [NormedAddCommGroup E] [InnerProductS
   simp only [gram_apply, mul_apply, transpose_apply, ← Module.Basis.sum_toMatrix_smul_self o b,
     inner_sum, inner_smul_right, sum_inner]
   simp [inner_smul_left, orthonormal_iff_ite.1 ho, mul_comm]
+
+end Matrix
