@@ -14,8 +14,6 @@ theorem Complex.inv_eq_conj_div_norm_sq {z : ℂ} :
     z⁻¹ = conj z / ‖z‖ ^ 2 := by
   by_cases h : (‖z‖ : ℂ) ^ 2 = 0
   · simp_all
-  have : z ≠ 0 := by
-    simp at h
-    exact fun hz ↦ by simp [hz] at h
+  have : z ≠ 0 := fun hz ↦ h (by simp [hz])
   field_simp
   simp [Complex.mul_conj, Complex.normSq_eq_norm_sq, this]

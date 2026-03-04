@@ -12,10 +12,11 @@ import Mathlib.Order.Filter.Cofinite
 open Filter
 
 lemma Filter.EventuallyEq.eventually_sum_eq_sum_add_finsum_sub_of_cofinite
-    {ι : Type*} [DecidableEq ι] {R : Type*} [AddCommGroup R]
+    {ι : Type*} {R : Type*} [AddCommGroup R]
     {a b : ι → R} (hab : a =ᶠ[cofinite] b) :
     ∀ᶠ s in (atTop : Filter (Finset ι)),
       ∑ i ∈ s, a i = ∑ i ∈ s, b i + ∑ᶠ i, (a i - b i) := by
+  classical
   have obs : ∃ (t : Finset ι), ∀ i ∉ t, a i = b i := by
     have hab' : {i | a i ≠ b i}.Finite := by
       convert mem_cofinite.mp hab using 1

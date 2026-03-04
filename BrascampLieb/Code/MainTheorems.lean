@@ -29,24 +29,17 @@ lemma upperBound_single_term {J E : Type*} {n} [Fintype J] [NormedAddCommGroup E
   simp only [mul_pow, ← Finset.prod_pow, ← NNReal.rpow_natCast, ← NNReal.rpow_mul,
     Nat.cast_ofNat, div_mul_cancel_of_invertible]
   apply NNReal.div_le_of_le_mul
-
   set M := D.loc + ∑ j, (D.weight j) • (D.map j).adjoint ∘ₗ (A j) ∘ₗ (D.map j)
   have hM : M.IsPosDef := loc_c_PosDef D.1 A (fun j ↦ (hA j).1)
   let lam : Fin n → NNReal := fun i ↦ ⟨hM.1.1.eigenvalues hn i, hM.1.nonneg_eigenvalues hn i⟩
-
   let basis := hM.1.1.eigenvectorBasis hn
-
   -- ℓ' j is the D.map j precomposed with the isometry from ℝ^d to E
   let ℓ' := fun j ↦ D.map j ∘ₗ basis.repr.symm.toLinearMap
-
   -- Greedy index sets
   let I := fun j ↦ greedy_index_set (hα j) (ℓ' j)
-
   have cardI j : Finset.card (I j) = m j := hm j ▸
     card_greedy_eq_of_essRank_eq (hm j) _ (hS j ▸ ((D.map j).EssentialRank_comp_Isometry ..).symm)
-
   rw [mul_assoc, mul_assoc]
-
   apply le_mul_of_le_mul_left (c := ∏ j, (∏ i ∈ I j, lam i) ^ (D.weight j : ℝ))
   -- show _ ≤ _ * ∏ j, (∏ i ∈ I j, lam i) ^ (D.weight j : ℝ)
   · simp only [NNReal.coe_sum, NNReal.coe_mul, NNReal.coe_natCast, neg_mul]
@@ -55,7 +48,8 @@ lemma upperBound_single_term {J E : Type*} {n} [Fintype J] [NormedAddCommGroup E
     refine Finset.prod_le_prod (by simp) fun j _ ↦ ?_
     · if hq : D.weight j = 0 then simp [hq] else
       rw [hm]
-      apply mainlem2 (D.weight _).2 (by grind [Nat.cast_pos] : 0 < (n : ℝ)) (pos_iff_ne_zero.2 hq) (hα j)
+      apply mainlem2 (D.weight _).2 (by grind [Nat.cast_pos] : 0 < (n : ℝ))
+        (pos_iff_ne_zero.2 hq) (hα j)
       simp only [NNReal.rpow_natCast, ← NNReal.coe_le_coe, NNReal.coe_mul, NNReal.coe_pow,
         NNReal.coe_mk, NNReal.coe_div, NNReal.coe_natCast, NNReal.coe_prod]
       refine mul_le_of_mul_le_of_nonneg_left (b := ∏ i ∈ I j, inner ℝ (A j (D.map j (basis i)))
@@ -82,7 +76,8 @@ lemma upperBound_single_term {J E : Type*} {n} [Fintype J] [NormedAddCommGroup E
   have hp : p = ⟨n - 1, Nat.pred_lt hE⟩ := by ext; simp [p]
   trans lam 0 ^ (D.Acuity - n + β : ℝ) * (lam p) ^ (-(β : ℝ)) * ∏ i, lam i
   · rw [← NNReal.coe_le_coe]
-    simp [lam]
+    simp only [NNReal.coe_prod, NNReal.coe_rpow, NNReal.coe_mk, NNReal.coe_sum, NNReal.coe_mul,
+      NNReal.coe_natCast, lam]
     obtain ⟨mm, rfl⟩ : ∃ mm, n = mm + 1 := ⟨n - 1, symm <| n.sub_one_add_one (by omega)⟩
     simp only [Nat.cast_add, Nat.cast_one]
     convert eigenvalue_telescoping' (hM.1.1.eigenvalues hn) (hM.1.1.eigenvalues_antitone hn)
@@ -168,7 +163,8 @@ theorem upperBound {J E : Type*} [Fintype J] [NormedAddCommGroup E] [InnerProduc
     have hM_zero : M_max = 0 := by
       simpa using congr_arg (LinearMap.toContinuousLinearMap (E := E) (F' := E)).symm h0
     have h : (∑ j, D.weight j • (D.map j).adjoint ∘ₗ D.reg j ∘ₗ D.map j).IsPositive :=
-      .sum fun j => .smul_of_nonneg (.adjoint_conj (D.pos_reg j).1 (D.map j)) (D.weight j).coe_nonneg
+      .sum fun j => .smul_of_nonneg (.adjoint_conj (D.pos_reg j).1 (D.map j))
+                        (D.weight j).coe_nonneg
     have hinner_zero : ∀ x, inner ℝ (D.loc x) x = 0 := fun x => by
       have := show inner ℝ (D.loc x) x +
           inner ℝ ((∑ j, D.weight j • (D.map j).adjoint ∘ₗ D.reg j ∘ₗ D.map j) x) x = 0 by

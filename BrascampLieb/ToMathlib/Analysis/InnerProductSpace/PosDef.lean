@@ -60,8 +60,9 @@ lemma inv_eigenval {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpace ℝ
     (hn : Module.finrank ℝ E = n) [FiniteDimensional ℝ E] {T : E →ₗ[ℝ] E} (hT : T.IsPosDef) (i) :
     (T.equivOfDetNeZero hT.2).symm.toLinearMap (hT.1.1.eigenvectorBasis hn i) =
       (hT.1.1.eigenvalues hn i)⁻¹ • (hT.1.1.eigenvectorBasis hn i) := by
-  convert (congr((HSMul.hSMul (hT.1.1.eigenvalues hn i)⁻¹) $(congr(
-    (T.equivOfDetNeZero hT.2).symm.toLinearMap $(hT.1.1.apply_eigenvectorBasis hn i))))).symm using 1
+  convert (congr((HSMul.hSMul (hT.1.1.eigenvalues hn i)⁻¹)
+      $(congr((T.equivOfDetNeZero hT.2).symm.toLinearMap
+        $(hT.1.1.apply_eigenvectorBasis hn i))))).symm using 1
   · rw [map_smul, ← SemigroupAction.mul_smul]
     change _ = ((hT.1.1.eigenvalues hn i)⁻¹ * hT.1.1.eigenvalues hn i) • _
     rw [inv_mul_cancel₀ (hT.eigenvalues_pos hn i).ne', one_smul]
@@ -109,3 +110,7 @@ lemma opNorm_inv_eq {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpace �
   haveI : NeZero n := ⟨hE⟩
   Eq.trans (b := hT.isSymmetric_inv.eigenvalues hn ⟨0, Nat.zero_lt_of_ne_zero hE⟩)
     (hT.isPositive_inv.opNorm_eq_top_eigenvalue hn) <| congr_fun (hT.eigenvalues_inv hn) _
+
+end IsPosDef
+
+end LinearMap
