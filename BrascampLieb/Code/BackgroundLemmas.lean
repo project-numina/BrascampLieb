@@ -41,16 +41,17 @@ variable {J E F : Type*} {n m} [Fintype J] [NormedAddCommGroup E] [InnerProductS
 open EuclideanSpace
 
 omit [FiniteDimensional ℝ F] in
-/-- Greedy index set construction.
-    Given a basis (e₁,...,eₐ) and threshold ε, construct I_j by processing indices
-    from d down to 1, including i if dist(ℓ_j eᵢ, span{ℓ_j eₖ : k ∈ I_j, k > i}) ≥ ε.
-    Algorithm:
-    1. Start with I = ∅
-    2. For i from d down to 1:
-       - Let S = {ℓ(e_k) : k ∈ I, k > i}
-       - If dist(ℓ(e_i), span(S)) ≥ ε, add i to I
-    3. Return I
-    -/
+/--
+Greedy index set construction.
+Given a basis (e₁,...,eₐ) and threshold ε, construct I_j by processing indices
+from d down to 1, including i if dist(ℓ_j eᵢ, span{ℓ_j eₖ : k ∈ I_j, k > i}) ≥ ε.
+Algorithm:
+1. Start with I = ∅
+2. For i from d down to 1:
+    - Let S = {ℓ(e_k) : k ∈ I, k > i}
+    - If dist(ℓ(e_i), span(S)) ≥ ε, add i to I
+3. Return I
+-/
 lemma greedy_index_set_exists {d : ℕ} (hα : 0 < α)
     (ℓ : EuclideanSpace ℝ (Fin d) →ₗ[ℝ] F) : ∃ I : Finset (Fin d),
     (∀ i ∈ I, Metric.infDist (ℓ (single i 1)) (ℓ '' Submodule.span ℝ (basisFun (Fin d) ℝ ''
@@ -60,8 +61,10 @@ lemma greedy_index_set_exists {d : ℕ} (hα : 0 < α)
   convert Fin.greedyIndexSet (fun i I ↦ Metric.infDist (ℓ (single i 1)) (ℓ ''
     (Submodule.span ℝ (basisFun (Fin d) ℝ '' I))) < (α : ℝ) / (NNReal.sqrt d : ℝ))
     fun i I hi ↦ (Metric.infDist_zero_of_mem ?_).trans_lt (by positivity)
-  all_goals try simp
-  exact ⟨EuclideanSpace.single i 1, Submodule.subset_span (Set.mem_image_of_mem _ hi), rfl⟩
+  · simp
+  · simp
+  · simp only [basisFun_apply, Set.mem_image, SetLike.mem_coe]
+    exact ⟨EuclideanSpace.single i 1, Submodule.subset_span (Set.mem_image_of_mem _ hi), rfl⟩
 
 omit [FiniteDimensional ℝ F] in
 noncomputable def greedy_index_set {d : ℕ} (hα : 0 < α)
@@ -69,7 +72,8 @@ noncomputable def greedy_index_set {d : ℕ} (hα : 0 < α)
   greedy_index_set_exists hα ℓ|>.choose
 
 attribute [local instance] Fintype.ofFinite in
-lemma essRank_le_ncard_inter_greedy {d n : ℕ} (hα : 0 < α) (ℓ : EuclideanSpace ℝ (Fin d) →ₗ[ℝ] F) (i)
+lemma essRank_le_ncard_inter_greedy {d n : ℕ} (hα : 0 < α)
+    (ℓ : EuclideanSpace ℝ (Fin d) →ₗ[ℝ] F) (i)
     (hn1 : Module.finrank ℝ ↥(Submodule.span ℝ
       (basisFun (Fin d) ℝ '' (SetLike.coe (Finset.Ici i)))) = n) :
     ℓ.EssentialRankRestrict α (Submodule.span ℝ (basisFun (Fin d) ℝ '' Finset.Ici i)) hn1 ≤
@@ -162,9 +166,11 @@ lemma card_greedy_eq_of_essRank_eq {d : ℕ} (hm : Module.finrank ℝ F = m) (h�
     exact  Ne.isUnit <| ne_of_gt <| by grw [← greedy_index_set_volume_bound hα ℓ]; positivity
   · haveI : NeZero d := ⟨hd⟩
     let E : Finset (Fin d) → _:= Submodule.span ℝ ∘ Set.image (basisFun (Fin d) ℝ) ∘ SetLike.coe
-    convert (by simpa only [show Finset.Ici (0 : Fin d) = ⊤ by ext; simp, Finset.top_eq_univ,
-      Finset.coe_univ, Set.image_univ, Finset.inter_univ] using
-      essRank_le_ncard_inter_greedy hα ℓ 0 (by simp [finrank_span_image' (basisFun (Fin d) ℝ)] : _ = d))
+    convert
+      (by simpa only [show Finset.Ici (0 : Fin d) = ⊤ by ext; simp, Finset.top_eq_univ,
+        Finset.coe_univ, Set.image_univ, Finset.inter_univ] using
+          essRank_le_ncard_inter_greedy hα ℓ 0
+            (by simp [finrank_span_image' (basisFun (Fin d) ℝ)] : _ = d))
     conv_lhs => rw [hm, ← hℓ]
     conv_rhs => enter [3]; erw [(basisFun (Fin d) ℝ).toBasis.span_eq]
     exact ℓ.EssRankRestrict_top finrank_euclideanSpace_fin α _ |>.symm

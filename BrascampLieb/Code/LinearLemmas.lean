@@ -12,14 +12,15 @@ namespace LinearMap
 open Matrix
 
 open InnerProductSpace in
-/-- Choleski determinant bound (Lemma lem:Choleski in blueprint).
-    For a positive semidefinite symmetric operator Q and a basis (ε₁, ..., εₐ),
-    det(Q) det(Gram Matrix of ε₁, ..., εₐ) ≤ ∏ₖ inner(Q εₖ, εₖ)⟨Q εₖ, εₖ⟩
-    The proof requires:
-    1. For orthonormal basis, use Choleski decomposition Q = L* L
-    2. For general basis, use Gram-Schmidt to relate to orthonormal case
-    3. The wedge product norm captures the volume distortion
-    -/
+/--
+Choleski determinant bound (Lemma lem:Choleski in blueprint).
+For a positive semidefinite symmetric operator Q and a basis (ε₁, ..., εₐ),
+det(Q) det(Gram Matrix of ε₁, ..., εₐ) ≤ ∏ₖ inner(Q εₖ, εₖ)⟨Q εₖ, εₖ⟩
+The proof requires:
+1. For orthonormal basis, use Choleski decomposition Q = L* L
+2. For general basis, use Gram-Schmidt to relate to orthonormal case
+3. The wedge product norm captures the volume distortion
+-/
 lemma choleski_det_bound₁ {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     (hn : Module.finrank ℝ E = n) [FiniteDimensional ℝ E] {Q : E →ₗ[ℝ] E} (hQ : Q.IsPositive)
     (v : Fin n → E) (hv : Orthonormal ℝ v) : Q.det ≤ ∏ i, inner ℝ (Q (v i)) (v i) :=
@@ -37,7 +38,16 @@ lemma choleski_det_bound₁ {E : Type*} {n} [NormedAddCommGroup E] [InnerProduct
   letI inst2 := M.transpose.toInnerProductSpace hM1.transpose.posSemidef
   have h_gs_tri' (k i : Fin n) (hk : k < i) : gramSchmidt ℝ (Pi.basisFun ℝ (Fin n)) k i = 0 :=
     @gramSchmidt_triangular ℝ (Fin n → ℝ) _ inst1 inst2 (Fin n) _ _ _ k i hk (Pi.basisFun ℝ (Fin n))
-  have h_ei_eq (i) := by simpa using congrFun (@gramSchmidt_def'' ℝ (Fin n → ℝ) _ inst1 inst2 (Fin n)
+  have h_ei_eq (i)
+    :
+    1 =
+    gramSchmidt ℝ (⇑(Pi.basisFun ℝ (Fin n))) i i +
+      ∑ x ∈ Finset.Iio i,
+        ⟪gramSchmidt ℝ (⇑(Pi.basisFun ℝ (Fin n))) x, Pi.single i 1⟫_ℝ /
+            ( @norm (Fin n → ℝ) inst1.toNorm (gramSchmidt ℝ (⇑(Pi.basisFun ℝ (Fin n))) x)) ^ 2 *
+          gramSchmidt ℝ (⇑(Pi.basisFun ℝ (Fin n))) x i
+          := by
+    simpa using congrFun (@gramSchmidt_def'' ℝ (Fin n → ℝ) _ inst1 inst2 (Fin n)
       _ _ _ (Pi.basisFun ℝ (Fin n)) i) i
   have h_det_L : (LDL.lower hM1).det = 1 := by
     simp only [LDL.lower, det_nonsing_inv]
@@ -90,7 +100,8 @@ lemma choleski_det_bound₁ {E : Type*} {n} [NormedAddCommGroup E] [InnerProduct
             mul_zero (LDL.lowerInv hM1 mF l)),
           ← add_zero (_ + _), ← (Finset.Ioi mF).sum_eq_zero (f := f) (fun l hl ↦
             LDL.lowerInv_triangular hM1 (Finset.mem_Ioi.mp hl) ▸ zero_mul (M.mulVec w l)),
-            add_assoc, ← Finset.sum_union (.symm <| Finset.disjoint_Ioi_Iio mF), Finset.Iio_union_Ioi,
+            add_assoc, ← Finset.sum_union (.symm <| Finset.disjoint_Ioi_Iio mF),
+            Finset.Iio_union_Ioi,
           ← Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ ⟨m, hj⟩) f, ← dotProduct.eq_1]
         simpa [EuclideanSpace.inner_toLp_toLp, hM1.isHermitian.toSymm_of_trivial.eq,
             dotProduct_comm,] using LDL.lowerInv_orthogonal hM1 (ne_of_lt h)
@@ -129,7 +140,8 @@ lemma choleski_det_bound {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpa
   · nth_rw 1 [← toMatrix_toLin obasis.toBasis obasis.toBasis (Aᵀ * Q_mat * A), det_toMatrix]
     refine le_of_le_of_eq (@choleski_det_bound₁ E n _ _ hn _ ((Aᵀ * Q_mat * A).toLin obasis.toBasis
       obasis.toBasis) ((posSemidef_toMatrix_iff obasis).1 <| by simpa) _ obasis.orthonormal) ?_
-    exact Finset.prod_congr rfl fun i _ ↦ by simp [real_inner_comm, ← toMatrixOrthonormal_apply_apply]
+    exact Finset.prod_congr rfl fun i _ ↦ by
+      simp [real_inner_comm, ← toMatrixOrthonormal_apply_apply]
   · rw [← Basis.sum_toMatrix_smul_self obasis.toBasis b i]
     simp only [map_sum, map_smul, inner_sum, sum_inner, inner_smul_left, inner_smul_right,
       mul_apply, transpose_apply, Real.ringHom_apply, OrthonormalBasis.coe_toBasis]
@@ -139,14 +151,16 @@ lemma choleski_det_bound {E : Type*} {n} [NormedAddCommGroup E] [InnerProductSpa
 /-! ## Section 7: Essential Rank Geometric Characterization -/
 
 open RCLike in
-/-- Essential rank geometric characterization (Lemma lem:essential_rank_eq in blueprint).
-    The α-essential rank of ℓ restricted to W equals the minimum dimension of a subspace E
-    such that the image of the unit ball ℓ(B₁^W) is contained in the α-neighborhood of E.
-    This bridges the SVD-based definition with the geometric covering property needed
-    for the greedy construction.
-    -/
+/--
+Essential rank geometric characterization (Lemma lem:essential_rank_eq in blueprint).
+The α-essential rank of ℓ restricted to W equals the minimum dimension of a subspace E
+such that the image of the unit ball ℓ(B₁^W) is contained in the α-neighborhood of E.
+This bridges the SVD-based definition with the geometric covering property needed
+for the greedy construction.
+-/
 lemma EssRank_eq_geometric {𝕜 : Type*} [RCLike 𝕜] {E F : Type*} {n}
-    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (hn : Module.finrank 𝕜 E = n) [FiniteDimensional 𝕜 E]
+    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+    (hn : Module.finrank 𝕜 E = n) [FiniteDimensional 𝕜 E]
     [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 F]
     (α : NNReal) (ℓ : E →ₗ[𝕜] F) :
     ℓ.EssentialRank hn α = sInf {d | ∃ (S : Submodule 𝕜 F), Module.finrank 𝕜 S = d ∧
@@ -165,9 +179,12 @@ lemma EssRank_eq_geometric {𝕜 : Type*} [RCLike 𝕜] {E F : Type*} {n}
     fun i _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, by simp⟩), ?_⟩⟩⟩
   · let interSub : Submodule 𝕜 F := S' ⊓ Sᗮ
     let supSub : Submodule 𝕜 F := S' ⊔ Sᗮ
-    have h_dim_inter_pos : 0 < Module.finrank 𝕜 interSub := (tsub_pos_iff_not_le.2 h_lt).trans_le <| by
-      rw [EssentialRank_eq, ← Fintype.card_coe, ← finrank_span_eq_card (ℓ.EssRankAux_apply_lindep hn α)]
-      grind [S.finrank_add_finrank_orthogonal, supSub.finrank_le, S'.finrank_sup_add_finrank_inf_eq Sᗮ]
+    have h_dim_inter_pos : 0 < Module.finrank 𝕜 interSub :=
+        (tsub_pos_iff_not_le.2 h_lt).trans_le <| by
+      rw [EssentialRank_eq, ← Fintype.card_coe,
+        ← finrank_span_eq_card (ℓ.EssRankAux_apply_lindep hn α)]
+      grind [S.finrank_add_finrank_orthogonal, supSub.finrank_le,
+        S'.finrank_sup_add_finrank_inf_eq Sᗮ]
     obtain ⟨w, hw1, hw2⟩ := interSub.exists_mem_ne_zero_of_ne_bot <| fun h ↦
       h_dim_inter_pos.ne' (h ▸ finrank_bot _ _)
     let c : (ℓ.EssRankAux hn α) → 𝕜 := fun i => inner 𝕜 (ℓ (basis i.val)) w / (eigs i : 𝕜)
@@ -250,7 +267,8 @@ lemma EssRank_eq_geometric {𝕜 : Type*} [RCLike 𝕜] {E F : Type*} {n}
     simp_rw [sum_inner, inner_smul_left, inner_smul_right]
     rw [Finset.sum_congr rfl fun i hi ↦ Finset.sum_eq_single i (fun j _ hij ↦
       (ℓ.inner_lin_apply_ne hn hij).symm ▸ by simp) (fun hi' => (hi' hi).elim)]
-    conv_lhs => enter [1, 2, 2, i]; rw [show _ = (eigs i : 𝕜) * _ from ℓ.inner_lin_apply_apply hn i i,
+    conv_lhs =>
+      enter [1, 2, 2, i] ; rw [show _ = (eigs i : 𝕜) * _ from ℓ.inner_lin_apply_apply hn i i,
       basis.inner_eq_one, mul_one, ← mul_assoc, RCLike.conj_mul, ← ofReal_pow, ← ofReal_mul]
     simp_rw [map_sum, ofReal_re]
     grw [Finset.sum_le_sum fun i hi ↦ by grw [h_bad_bound i hi], ← Finset.sum_mul,
@@ -292,7 +310,8 @@ lemma EssentialRank_comp_Isometry {𝕜 E1 E2 F : Type*} {n m} [RCLike 𝕜]
     [NormedAddCommGroup E1] [InnerProductSpace 𝕜 E1] (hn : Module.finrank 𝕜 E1 = n)
     [FiniteDimensional 𝕜 E1] [NormedAddCommGroup E2] [InnerProductSpace 𝕜 E2]
     (hm : Module.finrank 𝕜 E2 = m) [FiniteDimensional 𝕜 E2] [NormedAddCommGroup F]
-    [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 F] (e : E1 ≃ₗᵢ[𝕜] E2) {α : NNReal} (l : E2 →ₗ[𝕜] F) :
+    [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 F]
+    (e : E1 ≃ₗᵢ[𝕜] E2) {α : NNReal} (l : E2 →ₗ[𝕜] F) :
     l.EssentialRank hm α = (l ∘ₗ e.toLinearMap).EssentialRank hn α := by
   rw [EssRank_eq_geometric, EssRank_eq_geometric]
   refine congr(sInf $(Set.ext fun x ↦ ⟨?_, ?_⟩))

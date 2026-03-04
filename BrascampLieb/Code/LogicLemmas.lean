@@ -19,7 +19,8 @@ lemma Fin.greedyIndexSet {n : ℕ} (p : Fin n → Finset (Fin n) → Prop)
     obtain ⟨I, hI_ge, hI_neg, hI_pos⟩ := ih
     by_cases hpk : p ⟨k,hk⟩ I
     · /- Case: p ⟨k,hk⟩ I holds, so we don't add k to I -/
-      refine ⟨I, by grind, hI_neg, fun i hik => (eq_or_lt_of_le hik).casesOn ?_ (fun h ↦ hI_pos i h)⟩
+      refine ⟨I, by grind, hI_neg,
+        fun i hik => (eq_or_lt_of_le hik).casesOn ?_ (fun h ↦ hI_pos i h)⟩
       · exact fun _ ↦ by convert hpk <;> grind
     · /- Case: ¬p ⟨k,hk⟩ I, so we add k to I -/
       refine ⟨insert ⟨k,hk⟩ I, by grind, ?_, by grind⟩

@@ -42,7 +42,7 @@ lemma mem_EssRankAux' {i} (hi : i ∈ l.EssRankAux hn α) :
   convert (sq_lt_sq₀ α.coe_nonneg (Real.sqrt_nonneg _) |>.2 ((l.mem_EssRankAux hn α).1 hi)) using 1
   exact Real.sq_sqrt (l.isPositive_adjoint_comp_self.nonneg_eigenvalues hn i) |>.symm
 
-lemma mem_EssRank_pos {i} (hi : i ∈ l.EssRankAux hn α):
+lemma mem_EssRank_pos {i} (hi : i ∈ l.EssRankAux hn α) :
     0 < l.singularValues hn i :=
   α.coe_nonneg.trans_lt <| by simpa [mem_EssRankAux] using hi
 
@@ -76,7 +76,7 @@ structure Datum {J : Type*} [Fintype J]
   weight : J → NNReal
 
 noncomputable def Datum.AcuityWithin {J : Type*} [Fintype J] {E : Type*} {F : J → Type*} {m}
-    [NormedAddCommGroup E]  [(i : J) → NormedAddCommGroup (F i)]
+    [NormedAddCommGroup E] [(i : J) → NormedAddCommGroup (F i)]
     [InnerProductSpace ℝ E] [(i : J) → InnerProductSpace ℝ (F i)]
     [FiniteDimensional ℝ E] [(i : J) → FiniteDimensional ℝ (F i)]
     (D : Datum E F) (α : J → NNReal) (W : Submodule ℝ E) (hm : Module.finrank ℝ W = m) : NNReal :=
@@ -89,7 +89,7 @@ noncomputable abbrev Datum.Acuity {J : Type*} [Fintype J]
   ∑ j, D.weight j * Module.finrank ℝ (F j)
 
 noncomputable def Datum.IsMetricPercep {J : Type*} [Fintype J] {E : Type*} {F : J → Type*}
-    [NormedAddCommGroup E]  [(i : J) → NormedAddCommGroup (F i)]
+    [NormedAddCommGroup E] [(i : J) → NormedAddCommGroup (F i)]
     [InnerProductSpace ℝ E] [(i : J) → InnerProductSpace ℝ (F i)]
     [FiniteDimensional ℝ E] [(i : J) → FiniteDimensional ℝ (F i)]
     (D : Datum E F) (α : J → NNReal) (β : NNReal) :=
