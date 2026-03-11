@@ -1,7 +1,7 @@
 import BrascampLieb.ToMathlib.LinearAlgebra.Matrix.Symmetric
 import Mathlib.LinearAlgebra.Matrix.Hermitian
 
-lemma Matrix.IsHermitian.toSymm_of_trivial {n R : Type*} [Fintype n] [CommRing R]
+lemma Matrix.IsHermitian.toSymm_of_trivial {n R : Type*} [CommRing R]
     [Star R] [TrivialStar R] {A : Matrix n n R} (hA : A.IsHermitian) : A.IsSymm := by
   classical
   rw [IsSymm, ← conjTranspose_eq_transpose_of_trivial, hA.eq]

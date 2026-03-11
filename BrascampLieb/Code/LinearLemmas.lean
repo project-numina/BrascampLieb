@@ -324,7 +324,7 @@ lemma EssentialRankRestrict_comp_Isometry {𝕜 E F G : Type*} [RCLike 𝕜] {n 
     [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 F]
     [NormedAddCommGroup G] [InnerProductSpace 𝕜 G] [FiniteDimensional 𝕜 G]
     (l : F →ₗ[𝕜] G) (U : E ≃ₗᵢ[𝕜] F) (α : NNReal) (W : Submodule 𝕜 E)
-    (hn : Module.finrank 𝕜 W = n) (hm : Module.finrank 𝕜 (W.map U) = m) :
+    (hn : Module.finrank 𝕜 W = n) (hm : Module.finrank 𝕜 (W.map U.toLinearMap) = m) :
     l.EssentialRankRestrict α (W.map U.toLinearMap) hm =
     (l.comp U.toLinearMap).EssentialRankRestrict α W hn := by
   unfold EssentialRankRestrict
