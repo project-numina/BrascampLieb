@@ -90,9 +90,11 @@ lemma upperBound_single_term {J E : Type*} {n} [Fintype J] [NormedAddCommGroup E
         gcongr with j
         simp only [Fin.card_Ici, W]
         exact essRank_le_ncard_inter_greedy _ _ i _
-      · have hW : Module.finrank ℝ (Submodule.map basis.repr.symm W) = (mm + 1) - i := by
-          simp [LinearIsometryEquiv.finrank_map_eq, W, finrank_span_image']
-        have h := hW ▸ hP (Submodule.map basis.repr.symm W) hW
+      · have hW :
+            Module.finrank ℝ (Submodule.map (basis.repr.symm.toLinearMap) W) = (mm + 1) - i := by
+          rw [LinearIsometryEquiv.finrank_map_eq]
+          simp [W, finrank_span_image']
+        have h := hW ▸ hP (Submodule.map basis.repr.symm.toLinearMap W) hW
         simp only [NNReal.coe_add, NNReal.coe_natCast, NNReal.coe_one, NNReal.coe_sum,
           NNReal.coe_mul, Nat.cast_tsub, Nat.cast_add, Nat.cast_one, Datum.AcuityWithin,
           tsub_le_iff_right, Fin.card_Ici, ge_iff_le, ← NNReal.coe_le_coe] at h ⊢
