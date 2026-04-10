@@ -1,13 +1,5 @@
-# BrascampLieb
+# Formalised proof of Brascamp-Lieb inequalities
 
-## GitHub configuration
+In this repository, the proof of an effective upper bound `BrascampLieb.upperBound` (in the file `BrascampLieb/Code/MainTheorems.lean`) on the localized and regularized Brascamp-Lieb constants has been formalised in [LEAN](https://lean-lang.org/).
 
-To set up your new GitHub repository, follow these steps:
-
-* Under your repository name, click **Settings**.
-* In the **Actions** section of the sidebar, click "General".
-* Check the box **Allow GitHub Actions to create and approve pull requests**.
-* Click the **Pages** section of the settings sidebar.
-* In the **Source** dropdown menu, select "GitHub Actions".
-
-After following the steps above, you can remove this section from the README file.
+The informal proof is due to Bénard-He [[arXiv2511.11091](https://arxiv.org/abs/2511.11091), Theorem 1.4].
